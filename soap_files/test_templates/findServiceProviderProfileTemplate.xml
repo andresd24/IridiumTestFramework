@@ -1,0 +1,15 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"	xmlns:irid="http://www.iridium.com">
+	<soap:Header />
+	<soap:Body>
+		<irid:findServiceProviderProfile>
+			<request>
+				<iwsUsername>{iwsUsername}</iwsUsername>
+				<signature>{signature}</signature>
+				<serviceProviderAccountNumber>{serviceProviderAccountNumber}</serviceProviderAccountNumber>
+				<timestamp>{timestamp}</timestamp>
+				<caller></caller>
+				<callerPassword></callerPassword>
+			</request>
+		</irid:findServiceProviderProfile>
+	</soap:Body>
+</soap:Envelope>
