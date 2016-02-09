@@ -96,7 +96,6 @@ public class PopulateFeatureExamples {
         String line = null;
         while ((line = originalFileInputBufferedReader.readLine()) != null)
         {
-        	System.out.println(line);
             if (!line.contains("[autodatagen]")) {
             	
                 if (line.contains("Scenario Outline: ")) {
@@ -175,6 +174,19 @@ public class PopulateFeatureExamples {
     }
         
         
+    public static void PopulateExampleTags() throws IOException, ParseException
+    {
+        String feature_files_location = "src/test/resources/iridium/demo/";
+
+        File[] featureFiles = GetFilesInFolderWithSpecificExtension(feature_files_location, ".feature");
+
+        for (int i = 0; i < featureFiles.length; i++)
+        {
+            ProcessFile(featureFiles[i].getPath());
+        }
+    }
+
+    
     public static void main(String[] args) throws IOException, ParseException
     {
         String feature_files_location = "src/test/resources/iridium/demo/";

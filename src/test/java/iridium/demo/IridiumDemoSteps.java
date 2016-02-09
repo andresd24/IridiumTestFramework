@@ -22,12 +22,29 @@ import java.io.InputStreamReader;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
+import cucumber.api.java.Before; 
+import tools.datagen.PopulateFeatureExamples;
+
 //import cucumber.api.java.en.When;
 import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
 public class IridiumDemoSteps {
+	
+	@Before("@config")
+	public void init() 
+	{
+		System.out.println("setting up example files");
+		try 
+		{
+			PopulateFeatureExamples.PopulateExampleTags();
+		}
+		catch (Exception e)
+		{
+			System.out.println(e.toString());
+		}
+	}
 	
 	public class VariationPair 
 	{
@@ -90,7 +107,6 @@ public class IridiumDemoSteps {
         String line = null;
         while ((line = templateFileInputBufferedReader.readLine()) != null)
         {
-        	System.out.println(line);
         	for (int i = 0 ; i < soapVariables.size(); i++)
         	{
         		String currentTemplateString = soapVariables.get(i).getTemplateString(); 
