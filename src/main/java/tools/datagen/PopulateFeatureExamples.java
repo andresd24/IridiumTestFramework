@@ -1,5 +1,8 @@
 package tools.datagen;
 
+import tools.datagen.GenerateTestCaseVariations;
+
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -67,7 +70,7 @@ public class PopulateFeatureExamples {
     }
 
     // Insert logic for processing found files here.
-    private static void ProcessFile(String path) throws FileNotFoundException, IOException
+    private static void ProcessFile(String path, String jsonFile) throws FileNotFoundException, IOException
     {
         // Read the file and display it line by line.
         String originalFeatureFilePath = path;
@@ -111,7 +114,9 @@ public class PopulateFeatureExamples {
             	try 
             	{
 	            	JSONParser parser = new JSONParser();
-	            	JSONArray exampleTableArray = (JSONArray) parser.parse(new FileReader(String.format("features_json/%1$s.json", featureFileName)));
+	            	
+	            	JSONArray exampleTableArray = (JSONArray) parser.parse(new FileReader(jsonFile));
+	            	//JSONArray exampleTableArray = (JSONArray) parser.parse(new FileReader(String.format("features_json/%1$s.json", featureFileName)));
 	            	ProcessExample(processedFeatureFileTempBufferedWriter, exampleTableArray, scenarioTitle);
             	}
             	catch (ParseException p)
@@ -136,6 +141,8 @@ public class PopulateFeatureExamples {
 	        Files.delete(originalFeatureFile.toPath());
 	        Files.copy(processedFeatureFileTemp.toPath(), originalFeatureFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 	        Files.delete(processedFeatureFileTemp.toPath());
+	        // todo delete file in target automatically to avoid error
+	        ///Files.delete(processedFeatureFileTemp.toPath());
         }
         catch (Exception e)
         {
@@ -153,16 +160,16 @@ public class PopulateFeatureExamples {
         }
     }
     
-    public static void ProcessDirectory(final File folder) throws IOException, ParseException {
-            for (final File fileEntry : folder.listFiles()) {
-                if (fileEntry.isDirectory()) {
-                	ProcessDirectory(fileEntry);
-                } else {
-                    System.out.println(String.format("Processing feature file %1s", fileEntry.getName()));
-                	ProcessFile(fileEntry.getName());
-           }
-       }
-    }
+//    public static void ProcessDirectory(final File folder) throws IOException, ParseException {
+//            for (final File fileEntry : folder.listFiles()) {
+//                if (fileEntry.isDirectory()) {
+//                	ProcessDirectory(fileEntry);
+//                } else {
+//                    System.out.println(String.format("Processing feature file %1s", fileEntry.getName()));
+//                	ProcessFile(fileEntry.getName());
+//           }
+//       }
+//    }
 
     private static File[] GetFilesInFolderWithSpecificExtension(String folderPath, String extension){
     	File folder = new File(folderPath);
@@ -173,29 +180,27 @@ public class PopulateFeatureExamples {
     	} );
     }
         
-        
-    public static void PopulateExampleTags() throws IOException, ParseException
-    {
-        String feature_files_location = "src/test/resources/iridium/demo/";
-
-        File[] featureFiles = GetFilesInFolderWithSpecificExtension(feature_files_location, ".feature");
-
-        for (int i = 0; i < featureFiles.length; i++)
-        {
-            ProcessFile(featureFiles[i].getPath());
-        }
-    }
-
     
     public static void main(String[] args) throws IOException, ParseException
     {
+    	
         String feature_files_location = "src/test/resources/iridium/demo/";
-
+        String test_json_file = "";
+        
         File[] featureFiles = GetFilesInFolderWithSpecificExtension(feature_files_location, ".feature");
 
         for (int i = 0; i < featureFiles.length; i++)
         {
-            ProcessFile(featureFiles[i].getPath());
+        	test_json_file = GenerateTestCaseVariations.GenerateTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
+        			"findServiceProviderProfile", 8);
+        	
+        	if (test_json_file == "")
+        	{
+        		System.out.println("error generating test data exiting ...");
+        		return;
+        	}
+        	
+            ProcessFile(featureFiles[i].getPath(), test_json_file);
         }
     }
 }

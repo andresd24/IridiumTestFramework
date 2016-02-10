@@ -1,13 +1,18 @@
 package iridium.demo;
 
-//import static org.hamcrest.CoreMatchers.containsString;
-//import static org.junit.Assert.assertThat;
-//import static org.junit.Assert.assertTrue;
-//import org.w3c.dom.Document;
-//import org.w3c.dom.NodeList;
-//import javax.xml.parsers.DocumentBuilderFactory;
+import tools.datagen.VariationPair;
+import tools.datagen.VariationScenario;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import java.net.URL;
+import java.net.URLConnection;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
+import java.net.MalformedURLException;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,8 +27,6 @@ import java.io.InputStreamReader;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
-import cucumber.api.java.Before; 
-import tools.datagen.PopulateFeatureExamples;
 
 //import cucumber.api.java.en.When;
 import java.util.ArrayList;
@@ -32,46 +35,6 @@ import java.text.SimpleDateFormat;
 
 public class IridiumDemoSteps {
 	
-	@Before("@config")
-	public void init() 
-	{
-		System.out.println("setting up example files");
-		try 
-		{
-			PopulateFeatureExamples.PopulateExampleTags();
-		}
-		catch (Exception e)
-		{
-			System.out.println(e.toString());
-		}
-	}
-	
-	public class VariationPair 
-	{
-	    private String templateString = "";
-	    private String testData = "";
-
-	    public VariationPair(String templateString, String testData)
-	    {
-	        this.templateString = templateString;
-	        this.testData = testData;
-	    }
-	    public VariationPair() { }
-
-	    public String getTemplateString() {
-	        return templateString;
-	    }
-
-	    public String getTestData() {
-	        return testData;
-	    }
-
-	    public void setTestVariation(String templateSting, String testData) {
-	        this.templateString = templateSting;
-	        this.testData = testData;
-	    }
-	}		
-
 	private ArrayList<VariationPair> soapVariables = new ArrayList<VariationPair>();
 	private ArrayList<String> allResponseLines = new ArrayList<String>();
 	
@@ -135,24 +98,25 @@ public class IridiumDemoSteps {
     }
 	
 	
-	@Given("^the method exists findServiceProviderProfile exists the Iridiums service$") 
+	@Given("^that the Iridiums service is up and running$") 
 	public void checkIfFindServiceProviderProfileExists() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException 
 	{
-/*		
-		Process p = new ProcessBuilder("ext/curl", "-G", "http://192.168.0.218:8080/iws-current/iws-int?wsdl").start();
 		
-		InputStream inputStream = p.getInputStream();
-		InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-		
-		String newline = "";
-		while ((newline = bufferedReader.readLine()) != null)
-		{
-			System.out.println(newline);
-			allResponseLines.add(newline);
+		String urlStr = "http://192.168.0.218:8080/iws-current/iws-int?wsdl";
+		URL url = null;
+		boolean assertionIsThrown = false;
+		try {
+			  url = new URL(urlStr);
+			  URLConnection urlConnection = url.openConnection();
+		} catch (MalformedURLException ex) {
+				assertionIsThrown = true;   
+				System.out.println("bad URL");
+		} catch (IOException ex) {
+				assertionIsThrown = true;   
+				System.out.println("Failed opening connection. Perhaps WS is not up?");
 		}
-		p.destroy();
-		*/
+		assertFalse(assertionIsThrown);
+		return;
 	}
 	
 	
@@ -175,7 +139,7 @@ public class IridiumDemoSteps {
 		VariationPair timeStampPair = new VariationPair();
 		timeStampPair.setTestVariation("{timestamp}", timeStamp);
 		soapVariables.add(timeStampPair);
-
+		
 		String fileName = CreateSoapXMLFileVariation("findServiceProviderProfile", soapVariables);
 
 		fileName = String.format("@soap_files/test_cases/%1s", fileName);
@@ -197,11 +161,16 @@ public class IridiumDemoSteps {
 		p.destroy();
 	}
 
-	@Then("^result must contain the expected account number '(.*)' account name '(.*)'$")
-	public void checkThatTheResultContainsTheAccountNumberAndName()
+	@Then("^the result must contain the expected account number '(.*)' and account name '(.*)'$")
+	public void checkThatTheResultContainsTheAccountNumberAndName(String accountNumber, String accountName)
 	{
-		
-		
+        boolean passedThroughLoop = false;
+        for (int i = 0; i < allResponseLines.size(); i++)
+        {
+        	assertThat(allResponseLines.get(i), containsString(String.format("<accountNumber>%1$s</accountNumber><accountName>%2$s</accountName>", accountNumber, accountName)));
+        	passedThroughLoop = true;
+        }
+        assertTrue(passedThroughLoop);
 	}
 	
 	
