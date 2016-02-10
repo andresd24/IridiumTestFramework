@@ -23,7 +23,7 @@ public class GenerateTestCaseVariations {
 
 	private static String timestamp;
 	private static String signature;
-	private static String testFileName = "test_files/SP_ID.xlsx";
+	private static String testFileName = "input_files/database_files/SP_ID.xlsx";
 	
 	private static String secretKey = "abcdefg";
 	private static Mac macHash;
@@ -48,14 +48,6 @@ public class GenerateTestCaseVariations {
 	    return randomNum;
 	}
 	
-	private static String getFlatTimeStamp()
-	{
-		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
-		String formattedDate = sdf.format(date);
-		return formattedDate;
-	}
-		
 	private static int GetNumberOfRowsFromExcel()
 	{
 		int rows = 0;
@@ -236,14 +228,14 @@ public class GenerateTestCaseVariations {
 	}
 	
 	
-	public static String GenerateSequencedTestVariations(String featureFileName, String scenarioTitle, String webMethod, int variationCount) throws IOException
+	public static String GenerateSequencedTestVariations(String featureFileName, String scenarioTitle, String webMethod, String executionFolder, int variationCount) throws IOException
 	{
 		String testJsonPath = "";
 		int maxVaritions = GetNumberOfRowsFromExcel();
 		
 		if (variationCount < maxVaritions)
 		{
-			testJsonPath = String.format("features_json/test_variations/%1s_%2s.json", featureFileName, getFlatTimeStamp());
+			testJsonPath = String.format("test_executions/%1s/%2s.json", executionFolder, featureFileName);
 	        FileWriter jsonFileWriter = new FileWriter(testJsonPath, true);
 	        BufferedWriter jsonBufferedWriter = new BufferedWriter(jsonFileWriter);
 	    
@@ -259,24 +251,23 @@ public class GenerateTestCaseVariations {
 			}
 
 			GenerateExampleTestVariationFooter(jsonBufferedWriter);
-			jsonBufferedWriter.flush();
 			jsonBufferedWriter.close();
+			jsonFileWriter.close();
 		}
 		
 		return testJsonPath;
 	}
 
-	public static String GenerateRandomTestVariations(String featureFileName, String scenarioTitle, String webMethod, int variationCount) throws IOException
+	public static String GenerateRandomTestVariations(String featureFileName, String scenarioTitle, String webMethod, String executionFolder, int variationCount) throws IOException
 	{
 		String testJsonPath = "";
 		int maxVaritions = GetNumberOfRowsFromExcel();
-		
 		
 		if (variationCount < maxVaritions)
 		{
 			loadInitialVariations(maxVaritions);
 
-			testJsonPath = String.format("features_json/test_variations/%1s_%2s.json", featureFileName, getFlatTimeStamp());
+			testJsonPath = String.format("test_executions/%1s/%2s.json", executionFolder, featureFileName);
 	        FileWriter jsonFileWriter = new FileWriter(testJsonPath, true);
 	        BufferedWriter jsonBufferedWriter = new BufferedWriter(jsonFileWriter);
 	    
@@ -296,8 +287,9 @@ public class GenerateTestCaseVariations {
 			
         	System.out.println(listOfPossibleValues.size());
 
-			jsonBufferedWriter.flush();
 			jsonBufferedWriter.close();
+			jsonFileWriter.close();
+
 		}
 		
 		return testJsonPath;

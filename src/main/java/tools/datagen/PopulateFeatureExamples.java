@@ -18,11 +18,22 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.PrintWriter;
 
 public class PopulateFeatureExamples {
 	
+	
+	private static String getTestExecutionId()
+	{
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
+		String formattedDate = sdf.format(date);
+		return formattedDate;
+	}
 		
 	private static void ProcessExample(BufferedWriter processedFeatureFileTempBufferedWriter, JSONArray jsonArray, String inScenarioTitle) throws FileNotFoundException, IOException
     {
@@ -68,12 +79,108 @@ public class PopulateFeatureExamples {
 	        processedFeatureFileTempBufferedWriter.newLine();
     	}     
     }
+	
 
-    // Insert logic for processing found files here.
-    private static void ProcessFile(String path, String jsonFile) throws FileNotFoundException, IOException
+    // replace Example tables with [autodatagen]
+    private static void PreProcessFile(String path) throws FileNotFoundException, IOException
     {
         // Read the file and display it line by line.
         String originalFeatureFilePath = path;
+        boolean fileNeedsReplace = false;
+        
+        
+        // make file backup to current execution
+        String processedFeatureFileTempPath = path + ".autodatagen";
+
+        File originalFeatureFile = new File(originalFeatureFilePath);
+        File processedFeatureFileTemp = new File (processedFeatureFileTempPath);
+
+        if(processedFeatureFileTemp.exists() && !processedFeatureFileTemp.isDirectory()) { 
+        	processedFeatureFileTemp.delete();
+        }
+        
+        FileInputStream originalFileInput = new FileInputStream(originalFeatureFile);
+        BufferedReader originalFileInputBufferedReader = new BufferedReader(new InputStreamReader(originalFileInput));
+
+        FileWriter processedFeatureFileTempWriter = new FileWriter(processedFeatureFileTempPath, true);
+        BufferedWriter processedFeatureFileTempBufferedWriter = new BufferedWriter(processedFeatureFileTempWriter);
+        
+        String featureFileName = originalFeatureFile.getName();
+        		
+        System.out.println(featureFileName); 		
+        System.out.println(String.format("Pre processing file %1$s", originalFeatureFilePath));
+        
+        String line = null;
+        boolean newline_tag = false;
+        boolean example_tag = false;
+        while ((line = originalFileInputBufferedReader.readLine()) != null)
+        {
+            if (line.contains("Examples:") && newline_tag == false) {
+                line = "\t[autodatagen]";
+            	fileNeedsReplace = true;
+            	example_tag = true;
+                processedFeatureFileTempBufferedWriter.write(line);
+                processedFeatureFileTempBufferedWriter.newLine();
+            }
+            else if (example_tag == true && newline_tag == false )
+            {
+        		if (line.trim().length() == 0)
+        		{
+        			newline_tag = true;
+        		}
+            }
+            else if (example_tag == true && newline_tag == true)
+            {
+            	example_tag = false;
+            	newline_tag = false;
+                processedFeatureFileTempBufferedWriter.write(line);
+                processedFeatureFileTempBufferedWriter.newLine();
+            }
+            else 
+            {
+            	processedFeatureFileTempBufferedWriter.write(line);
+                processedFeatureFileTempBufferedWriter.newLine();
+            }
+        }
+        
+        originalFileInput.close();
+        originalFileInputBufferedReader.close();
+        processedFeatureFileTempWriter.flush();
+        processedFeatureFileTempBufferedWriter.flush();
+        processedFeatureFileTempWriter.close();
+        processedFeatureFileTempBufferedWriter.close();
+        
+
+    	if (fileNeedsReplace)
+    	{
+	        try {
+		        //repalce files (temp with feature)
+		        Files.delete(originalFeatureFile.toPath());
+		        Files.copy(processedFeatureFileTemp.toPath(), originalFeatureFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		        Files.delete(processedFeatureFileTemp.toPath());
+		        
+        	}
+	        catch (Exception e)
+	        {
+	        	System.out.println("error pre-processing file!");
+	        }   
+    	}
+    	else
+    	{
+	        Files.delete(originalFeatureFile.toPath());
+    	}
+    	
+    	return;
+    }
+
+    // Insert logic for processing found files here.
+    private static void ProcessFile(String path, String jsonFile, String test_execution_id) throws FileNotFoundException, IOException
+    {
+        // Read the file and display it line by line.
+        String originalFeatureFilePath = path;
+        
+        
+        // make file backup to current execution
         String processedFeatureFileTempPath = path + ".temp";
 
         File originalFeatureFile = new File(originalFeatureFilePath);
@@ -141,36 +248,37 @@ public class PopulateFeatureExamples {
 	        Files.delete(originalFeatureFile.toPath());
 	        Files.copy(processedFeatureFileTemp.toPath(), originalFeatureFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 	        Files.delete(processedFeatureFileTemp.toPath());
-	        // todo delete file in target automatically to avoid error
-	        ///Files.delete(processedFeatureFileTemp.toPath());
+	        
+	        File test_execution_id_file = new File (String.format("test_executions/%1s/%2s", test_execution_id, originalFeatureFile.getName()));
+
+	        // copy to test folder 
+	        Files.copy(originalFeatureFile.toPath(), test_execution_id_file.toPath(),StandardCopyOption.REPLACE_EXISTING);
         }
         catch (Exception e)
         {
-        	
+        	System.out.println("error processing file!" + e.toString());
         }   
         
         try 
         {
 			Process p = new ProcessBuilder("ext/mvn.cmd", "test").start();
-			p.waitFor();
+			try {
+			    Thread.sleep(2000);                 //1000 for different timestamps
+			} catch(InterruptedException ex) {
+			    Thread.currentThread().interrupt();
+			}
+			
+	        p.destroy();
+
         }
         catch (Exception e)
         {
         	System.out.println(e.toString());        	
         }
+        
+        return;
     }
     
-//    public static void ProcessDirectory(final File folder) throws IOException, ParseException {
-//            for (final File fileEntry : folder.listFiles()) {
-//                if (fileEntry.isDirectory()) {
-//                	ProcessDirectory(fileEntry);
-//                } else {
-//                    System.out.println(String.format("Processing feature file %1s", fileEntry.getName()));
-//                	ProcessFile(fileEntry.getName());
-//           }
-//       }
-//    }
-
     private static File[] GetFilesInFolderWithSpecificExtension(String folderPath, String extension){
     	File folder = new File(folderPath);
 
@@ -181,29 +289,68 @@ public class PopulateFeatureExamples {
     }
         
     
+    public static void cleanFeatureFiles() 
+    {
+    	System.out.println();
+    	
+    }
+    
+    
     public static void main(String[] args) throws IOException, ParseException
     {
-    	
-        String feature_files_location = "src/test/resources/iridium/demo/";
-        String test_json_file = "";
-        
-        File[] featureFiles = GetFilesInFolderWithSpecificExtension(feature_files_location, ".feature");
-
-        for (int i = 0; i < featureFiles.length; i++)
+        try 
         {
-//        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
-//        			"findServiceProviderProfile", 10);
+	        String feature_files_location = "src/test/resources/iridium/demo/";
+	        String test_json_file = "";
+	        boolean folderCreated = false;
 
-        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
-        			"findServiceProviderProfile", 10);
+            String test_execution_id = getTestExecutionId();
+            File[] featureFiles = GetFilesInFolderWithSpecificExtension(feature_files_location, ".feature");
+	        folderCreated = new File(String.format("test_executions/%1s/soap_requests", test_execution_id)).mkdirs();
+			if (folderCreated)
+			{
+				System.out.println(String.format("test execution folder %1s created .....", test_execution_id));
+			}
+			else
+			{
+				System.out.println("failed to created execution folder");
+				return;
+			}
+	        
+        	File currentTestExecutionId = new File("test_executions/current_execution.txt");
+        	if(!currentTestExecutionId.exists()) {
+        		currentTestExecutionId.createNewFile();
+        	} 
         	
-        	if (test_json_file == "")
-        	{
-        		System.out.println("error generating test data exiting ...");
-        		return;
-        	}
-        	
-            ProcessFile(featureFiles[i].getPath(), test_json_file);
+        	FileWriter currentTestExecutionIdWritter = new FileWriter(currentTestExecutionId, false); // false to overwrite.
+        	currentTestExecutionIdWritter.write(test_execution_id);
+        	currentTestExecutionIdWritter.close();
+
+	    	
+	        for (int i = 0; i < featureFiles.length; i++)
+	        {
+	        	PreProcessFile(featureFiles[i].getPath());
+	
+//	        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
+//	        			"findServiceProviderProfile", test_execution_id, 5);
+	
+	        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
+	        			"findServiceProviderProfile", test_execution_id, 7);
+	        	
+	        	if (test_json_file == "")
+	        	{
+	        		System.out.println("error generating test data exiting ...");
+	        		return;
+	        	}
+	        	
+	            ProcessFile(featureFiles[i].getPath(), test_json_file, test_execution_id);
+	        }
         }
+        catch (Exception e){
+    		System.out.println(e.toString());
+        }
+        
+        return;
+        
     }
 }

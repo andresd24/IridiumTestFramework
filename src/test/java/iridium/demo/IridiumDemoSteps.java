@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
+import cucumber.api.java.After;
 
 //import cucumber.api.java.en.When;
 import java.util.ArrayList;
@@ -37,6 +38,25 @@ public class IridiumDemoSteps {
 	
 	private ArrayList<VariationPair> soapVariables = new ArrayList<VariationPair>();
 	private ArrayList<String> allResponseLines = new ArrayList<String>();
+	
+	private static String getCurrentExecution() throws IOException
+	{
+        File currentExecutionFile = new File("test_executions/current_execution.txt");
+        
+        FileInputStream currentExecutionReader = new FileInputStream(currentExecutionFile);
+        BufferedReader currentExecutionBufferedReader = new BufferedReader(new InputStreamReader(currentExecutionReader));
+
+        String current_execution_id = "";
+        String line = null;
+        while ((line = currentExecutionBufferedReader.readLine()) != null)
+        {
+        	current_execution_id = line.trim();
+        }
+        currentExecutionBufferedReader.close();
+        
+        return current_execution_id;
+        
+	}
 	
 	private static String getFlatTimeStamp()
 	{
@@ -49,9 +69,10 @@ public class IridiumDemoSteps {
 	private static String CreateSoapXMLFileVariation(String soapMethodToTest, ArrayList<VariationPair> soapVariables) throws FileNotFoundException, IOException
     {
 		String flatTimeStamp = getFlatTimeStamp();
-
-	    String templateSoapFilePath = String.format("soap_files/test_templates/%1sTemplate.xml", soapMethodToTest);
-        String soapFileTestVariationFilePath = String.format("soap_files/test_cases/%1s_%2s.xml", soapMethodToTest, flatTimeStamp);
+		String currentExecutionId = getCurrentExecution();
+		
+	    String templateSoapFilePath = String.format("input_files/soap_templates/%1sTemplate.xml", soapMethodToTest);
+        String soapFileTestVariationFilePath = String.format("test_executions/%1s/soap_requests/%2s_%3s.xml", currentExecutionId, soapMethodToTest, flatTimeStamp);
 
         File templateSoapFile = new File(templateSoapFilePath);
         File soapFileTestVariationFile = new File (soapFileTestVariationFilePath);
@@ -142,7 +163,7 @@ public class IridiumDemoSteps {
 		
 		String fileName = CreateSoapXMLFileVariation("findServiceProviderProfile", soapVariables);
 
-		fileName = String.format("@soap_files/test_cases/%1s", fileName);
+		fileName = String.format("@test_executions/%1s/soap_requests/%2s", getCurrentExecution(), fileName);
 		System.out.println(fileName);
         
 		Process p = new ProcessBuilder("ext/curl", "-X", "POST", "--header", "Content-Type: application/soap+xml;charset=UTF-8", 
@@ -173,5 +194,5 @@ public class IridiumDemoSteps {
         assertTrue(passedThroughLoop);
 	}
 	
-	
+
 }
