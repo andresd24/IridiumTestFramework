@@ -191,8 +191,11 @@ public class PopulateFeatureExamples {
 
         for (int i = 0; i < featureFiles.length; i++)
         {
-        	test_json_file = GenerateTestCaseVariations.GenerateTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
-        			"findServiceProviderProfile", 8);
+//        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
+//        			"findServiceProviderProfile", 10);
+
+        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
+        			"findServiceProviderProfile", 10);
         	
         	if (test_json_file == "")
         	{

@@ -5,21 +5,19 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
-
 import org.apache.poi.ss.usermodel.DataFormatter;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
+import java.util.Random;
 
 public class GenerateTestCaseVariations {
 
@@ -30,6 +28,25 @@ public class GenerateTestCaseVariations {
 	private static String secretKey = "abcdefg";
 	private static Mac macHash;
 	
+	private static ArrayList<Integer> listOfPossibleValues = new ArrayList<Integer>();
+	
+	
+	private static void loadInitialVariations(int maxNumberOfValues)
+	{
+		 for (int i = 0; i < maxNumberOfValues; i++)
+		 {
+			 listOfPossibleValues.add(i);
+		 }
+	}
+	
+	private static int GetRandomVariationIndex() 
+	{
+	    Random rand = new Random();
+	    int randomNum = rand.nextInt(listOfPossibleValues.size());
+	    listOfPossibleValues.remove(randomNum);
+	    System.out.println(randomNum);
+	    return randomNum;
+	}
 	
 	private static String getFlatTimeStamp()
 	{
@@ -39,7 +56,7 @@ public class GenerateTestCaseVariations {
 		return formattedDate;
 	}
 		
-	private static int GetNumberOfColumnsFromExcel()
+	private static int GetNumberOfRowsFromExcel()
 	{
 		int rows = 0;
 		try {
@@ -105,7 +122,7 @@ public class GenerateTestCaseVariations {
 	}
 
 	
-	private static void AddTestCaseVariationToScenario(BufferedWriter jsonBufferedWriter, VariationScenario scenario, String webMethod, int index) throws IOException
+	private static void AddTestCaseVariationToScenario(BufferedWriter jsonBufferedWriter, String webMethod, int index) throws IOException
 	{
 	
 		timestamp = "";
@@ -150,88 +167,140 @@ public class GenerateTestCaseVariations {
 		
 	}
 	
-	public static String GenerateTestVariations(String featureFileName, String scenarioTitle, String webMethod, int variationCount) throws IOException
+	private static void GenerateExamplesTableHeader(BufferedWriter jsonBufferedWriter, String scenarioTitle) throws IOException
+	{
+		jsonBufferedWriter.write("[");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t {");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t \"title\": \"" + scenarioTitle +  "\",");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t \"testColumnTitles\":[");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t\t \"iwsUsername\",");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t\t \"signature\",");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t\t \"serviceProviderAccountNumber\",");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t\t \"timestamp\",");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t\t \"accountName\"");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t ]");
+		jsonBufferedWriter.newLine();
+	}
+	
+	private static void GenerateExampleTestRowVariation(BufferedWriter jsonBufferedWriter, String webMethod, int variationCount, int index) throws IOException
+	{
+		jsonBufferedWriter.write("\t\t {");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t\t \"testRow\": [");
+		jsonBufferedWriter.newLine();
+
+		AddTestCaseVariationToScenario(jsonBufferedWriter, webMethod, index);
+		
+		jsonBufferedWriter.write("\t\t\t ]");
+		jsonBufferedWriter.newLine();
+
+		if (index < variationCount - 1)
+		{
+			jsonBufferedWriter.write("\t\t },");
+			jsonBufferedWriter.newLine();
+		}
+		else if (index == variationCount - 1)
+		{
+			jsonBufferedWriter.write("\t\t }");
+		}					
+		else 
+		{
+			jsonBufferedWriter.write("\t\t }");
+		}					
+		
+		try {
+		    Thread.sleep(1000);                 //1000 for different timestamps
+		} catch(InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		}
+	}
+	
+	private static void GenerateExampleTestVariationFooter(BufferedWriter jsonBufferedWriter) throws IOException
+	{
+    	jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t\t]");
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("\t}");
+
+		jsonBufferedWriter.newLine();
+		jsonBufferedWriter.write("]");
+	}
+	
+	
+	public static String GenerateSequencedTestVariations(String featureFileName, String scenarioTitle, String webMethod, int variationCount) throws IOException
 	{
 		String testJsonPath = "";
+		int maxVaritions = GetNumberOfRowsFromExcel();
 		
-		VariationScenario findServiceProfileScenario = new VariationScenario("findServiceProviderProfile test scenario");
-		
-		if (variationCount < GetNumberOfColumnsFromExcel())
+		if (variationCount < maxVaritions)
 		{
 			testJsonPath = String.format("features_json/test_variations/%1s_%2s.json", featureFileName, getFlatTimeStamp());
 	        FileWriter jsonFileWriter = new FileWriter(testJsonPath, true);
 	        BufferedWriter jsonBufferedWriter = new BufferedWriter(jsonFileWriter);
 	    
-			jsonBufferedWriter.write("[");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t {");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t \"title\": \"" + scenarioTitle +  "\",");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t \"testColumnTitles\":[");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t\t \"iwsUsername\",");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t\t \"signature\",");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t\t \"serviceProviderAccountNumber\",");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t\t \"timestamp\",");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t\t \"accountName\"");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t ]");
-			jsonBufferedWriter.newLine();
+	        GenerateExamplesTableHeader(jsonBufferedWriter, scenarioTitle);
+			
 			jsonBufferedWriter.write("\t\t \"testRows\":[ ");
 			jsonBufferedWriter.newLine();
 	        
-			
+			// generate variations
 			for (int i = 0; i < variationCount; i++)
 			{
-				jsonBufferedWriter.write("\t\t {");
-				jsonBufferedWriter.newLine();
-				jsonBufferedWriter.write("\t\t\t \"testRow\": [");
-				jsonBufferedWriter.newLine();
-
-
-				AddTestCaseVariationToScenario(jsonBufferedWriter, findServiceProfileScenario, webMethod, i);
-				
-				jsonBufferedWriter.write("\t\t\t ]");
-				jsonBufferedWriter.newLine();
-
-				if (i < variationCount - 1)
-				{
-					jsonBufferedWriter.write("\t\t },");
-					jsonBufferedWriter.newLine();
-				}
-				else if (i == variationCount - 1)
-				{
-					jsonBufferedWriter.write("\t\t }");
-				}					
-				
-				try {
-				    Thread.sleep(1000);                 //1000 for different timestamps
-				} catch(InterruptedException ex) {
-				    Thread.currentThread().interrupt();
-				}
-				
+				GenerateExampleTestRowVariation(jsonBufferedWriter, webMethod, variationCount, i); 
 			}
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t]");
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("\t\t}");
 
-			jsonBufferedWriter.newLine();
-			jsonBufferedWriter.write("]");
-
-			
+			GenerateExampleTestVariationFooter(jsonBufferedWriter);
 			jsonBufferedWriter.flush();
 			jsonBufferedWriter.close();
 		}
 		
 		return testJsonPath;
-		
 	}
 
-	
+	public static String GenerateRandomTestVariations(String featureFileName, String scenarioTitle, String webMethod, int variationCount) throws IOException
+	{
+		String testJsonPath = "";
+		int maxVaritions = GetNumberOfRowsFromExcel();
+		
+		
+		if (variationCount < maxVaritions)
+		{
+			loadInitialVariations(maxVaritions);
+
+			testJsonPath = String.format("features_json/test_variations/%1s_%2s.json", featureFileName, getFlatTimeStamp());
+	        FileWriter jsonFileWriter = new FileWriter(testJsonPath, true);
+	        BufferedWriter jsonBufferedWriter = new BufferedWriter(jsonFileWriter);
+	    
+	        GenerateExamplesTableHeader(jsonBufferedWriter, scenarioTitle);
+			
+			jsonBufferedWriter.write("\t\t \"testRows\":[ ");
+			jsonBufferedWriter.newLine();
+	        
+			// generate variations
+			for (int i = 0; i < variationCount; i++)
+			{
+				int randomIndex = GetRandomVariationIndex();
+				GenerateExampleTestRowVariation(jsonBufferedWriter, webMethod, variationCount, randomIndex); 
+			}
+
+			GenerateExampleTestVariationFooter(jsonBufferedWriter);
+			
+        	System.out.println(listOfPossibleValues.size());
+
+			jsonBufferedWriter.flush();
+			jsonBufferedWriter.close();
+		}
+		
+		return testJsonPath;
+	}
+
 }
