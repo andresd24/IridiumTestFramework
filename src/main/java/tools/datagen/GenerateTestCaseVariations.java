@@ -44,7 +44,6 @@ public class GenerateTestCaseVariations {
 	    Random rand = new Random();
 	    int randomNum = rand.nextInt(listOfPossibleValues.size());
 	    listOfPossibleValues.remove(randomNum);
-	    System.out.println(randomNum);
 	    return randomNum;
 	}
 	
@@ -122,6 +121,7 @@ public class GenerateTestCaseVariations {
 		
 		GenerateIridiumVariationSignature(webMethod);
 		
+	    System.out.println("Generating variations using database row " + (index +1));
 		
 		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"IWSTESTSP0001\"},");
 		jsonBufferedWriter.newLine();
@@ -285,8 +285,6 @@ public class GenerateTestCaseVariations {
 
 			GenerateExampleTestVariationFooter(jsonBufferedWriter);
 			
-        	System.out.println(listOfPossibleValues.size());
-
 			jsonBufferedWriter.close();
 			jsonFileWriter.close();
 

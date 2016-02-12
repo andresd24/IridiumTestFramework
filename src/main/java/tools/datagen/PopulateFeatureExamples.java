@@ -167,7 +167,7 @@ public class PopulateFeatureExamples {
     	}
     	else
     	{
-	        Files.delete(originalFeatureFile.toPath());
+	        Files.delete(processedFeatureFileTemp.toPath());
     	}
     	
     	return;
@@ -332,7 +332,7 @@ public class PopulateFeatureExamples {
 	        	PreProcessFile(featureFiles[i].getPath());
 	
 //	        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
-//	        			"findServiceProviderProfile", test_execution_id, 5);
+//	        			"findServiceProviderProfile", test_execution_id, 7);
 	
 	        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
 	        			"findServiceProviderProfile", test_execution_id, 7);
