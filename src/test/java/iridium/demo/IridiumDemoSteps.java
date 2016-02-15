@@ -1,7 +1,6 @@
 package iridium.demo;
 
 import tools.datagen.VariationPair;
-import tools.datagen.VariationScenario;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -27,9 +26,7 @@ import java.io.InputStreamReader;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
-import cucumber.api.java.After;
 
-//import cucumber.api.java.en.When;
 import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -129,6 +126,8 @@ public class IridiumDemoSteps {
 		try {
 			  url = new URL(urlStr);
 			  URLConnection urlConnection = url.openConnection();
+			  //urlConnection.wait();
+			 // urlConnection.connect();
 		} catch (MalformedURLException ex) {
 				assertionIsThrown = true;   
 				System.out.println("bad URL");

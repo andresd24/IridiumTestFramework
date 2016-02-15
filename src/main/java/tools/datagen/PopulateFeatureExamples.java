@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.PrintWriter;
 
 public class PopulateFeatureExamples {
 	
@@ -81,7 +80,7 @@ public class PopulateFeatureExamples {
     }
 	
 
-    // replace Example tables with [autodatagen]
+    // clean Examples table and replace them with [autodatagen] tag
     private static void PreProcessFile(String path) throws FileNotFoundException, IOException
     {
         // Read the file and display it line by line.
@@ -221,9 +220,7 @@ public class PopulateFeatureExamples {
             	try 
             	{
 	            	JSONParser parser = new JSONParser();
-	            	
 	            	JSONArray exampleTableArray = (JSONArray) parser.parse(new FileReader(jsonFile));
-	            	//JSONArray exampleTableArray = (JSONArray) parser.parse(new FileReader(String.format("features_json/%1$s.json", featureFileName)));
 	            	ProcessExample(processedFeatureFileTempBufferedWriter, exampleTableArray, scenarioTitle);
             	}
             	catch (ParseException p)
@@ -288,13 +285,6 @@ public class PopulateFeatureExamples {
     	} );
     }
         
-    
-    public static void cleanFeatureFiles() 
-    {
-    	System.out.println();
-    	
-    }
-    
     
     public static void main(String[] args) throws IOException, ParseException
     {
