@@ -25,7 +25,6 @@ import java.io.FileReader;
 
 public class PopulateFeatureExamples {
 	
-	
 	private static String getTestExecutionId()
 	{
 		Date date = new Date();

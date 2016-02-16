@@ -36,7 +36,7 @@ public class IridiumDemoSteps {
 	private ArrayList<VariationPair> soapVariables = new ArrayList<VariationPair>();
 	private ArrayList<String> allResponseLines = new ArrayList<String>();
 	
-	private static String getCurrentExecution() throws IOException
+	public static String getCurrentExecution() throws IOException
 	{
         File currentExecutionFile = new File("test_executions/current_execution.txt");
         
@@ -52,7 +52,6 @@ public class IridiumDemoSteps {
         currentExecutionBufferedReader.close();
         
         return current_execution_id;
-        
 	}
 	
 	private static String getFlatTimeStamp()
@@ -126,8 +125,7 @@ public class IridiumDemoSteps {
 		try {
 			  url = new URL(urlStr);
 			  URLConnection urlConnection = url.openConnection();
-			  //urlConnection.wait();
-			 // urlConnection.connect();
+			   urlConnection.connect();
 		} catch (MalformedURLException ex) {
 				assertionIsThrown = true;   
 				System.out.println("bad URL");

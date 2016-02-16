@@ -16,6 +16,18 @@
     </properties>
     
 	<dependencies>
+<!-- This is giving an error
+		
+	<dependency>
+			<groupId>org.eclipse.ui</groupId>
+			<artifactId>console</artifactId>
+			<version>3.2.0-v20070530</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.eclipse.swt.win32.win32</groupId>
+			<artifactId>x86</artifactId>
+			<version>3.3.0-v3346</version>
+		</dependency>
 		<dependency>
 			<groupId>info.cukes</groupId>
 			<artifactId>cucumber-java</artifactId>
@@ -69,6 +81,13 @@
         	<artifactId>poi-ooxml-schemas</artifactId>
     	    <version>3.7</version>
 	    </dependency>
+	      	<dependency>
+   			<groupId>commons-io</groupId>
+   			<artifactId>commons-io</artifactId>
+		   <version>2.4</version>
+	  	</dependency>
+
+
 	</dependencies>
 
 	<build>
