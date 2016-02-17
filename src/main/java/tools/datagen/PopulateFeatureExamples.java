@@ -319,8 +319,15 @@ public class PopulateFeatureExamples {
 	        	
 	        	System.out.println(String.format("processing feature file \"%1s\"", currentFileName));
 	        	
+	        	
+	        	/***************************************************************************************************/
+	        	// TODO: We can't hard code the service name here.  All the data generation is hard coded as well  //
+	        	//       the next step would be to create a generic data generation engine using the same logic:   //
+	        	//		Input (DB/File/Algorithm) -> JSON Generation -> Feature file modification 	        	   //
+	        	/***************************************************************************************************/
+	        	
 	        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations(currentFileName, "findServiceProviderProfile test scenario", 
-	        			"findServiceProviderProfile", test_execution_id, 7);
+	        			"findServiceProviderProfile", test_execution_id, 5);
 	
 //	        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations(currentFileName, "findServiceProviderProfile test scenario", 
 //	        			"findServiceProviderProfile", test_execution_id, 7);
