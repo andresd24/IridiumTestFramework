@@ -103,11 +103,6 @@ public class PopulateFeatureExamples {
         FileWriter processedFeatureFileTempWriter = new FileWriter(processedFeatureFileTempPath, true);
         BufferedWriter processedFeatureFileTempBufferedWriter = new BufferedWriter(processedFeatureFileTempWriter);
         
-        String featureFileName = originalFeatureFile.getName();
-        		
-        System.out.println(featureFileName); 		
-        System.out.println(String.format("Pre processing file %1$s", originalFeatureFilePath));
-        
         String line = null;
         boolean newline_tag = false;
         boolean example_tag = false;
@@ -194,9 +189,7 @@ public class PopulateFeatureExamples {
         FileWriter processedFeatureFileTempWriter = new FileWriter(processedFeatureFileTempPath, true);
         BufferedWriter processedFeatureFileTempBufferedWriter = new BufferedWriter(processedFeatureFileTempWriter);
         
-        String featureFileName = originalFeatureFile.getName();
-        		
-        System.out.println(featureFileName); 		
+    	System.out.println("");
         System.out.println(String.format("Processed file %1$s", originalFeatureFilePath));
         
         String scenarioTitle = "";
@@ -292,13 +285,15 @@ public class PopulateFeatureExamples {
 	        String feature_files_location = "src/test/resources/iridium/demo/";
 	        String test_json_file = "";
 	        boolean folderCreated = false;
-
+	        String currentFileName = ""; 	
+	        
             String test_execution_id = getTestExecutionId();
             File[] featureFiles = GetFilesInFolderWithSpecificExtension(feature_files_location, ".feature");
 	        folderCreated = new File(String.format("test_executions/%1s/soap_requests", test_execution_id)).mkdirs();
 			if (folderCreated)
 			{
-				System.out.println(String.format("test execution folder %1s created .....", test_execution_id));
+				System.out.println(String.format("test execution folder %1s created", test_execution_id));
+				System.out.println("");
 			}
 			else
 			{
@@ -320,11 +315,15 @@ public class PopulateFeatureExamples {
 	        {
 	        	PreProcessFile(featureFiles[i].getPath());
 	
-//	        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
-//	        			"findServiceProviderProfile", test_execution_id, 7);
-	
-	        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations("iridium.feature", "findServiceProviderProfile test scenario", 
+	        	currentFileName = featureFiles[i].getName();
+	        	
+	        	System.out.println(String.format("processing feature file \"%1s\"", currentFileName));
+	        	
+	        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations(currentFileName, "findServiceProviderProfile test scenario", 
 	        			"findServiceProviderProfile", test_execution_id, 7);
+	
+//	        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations(currentFileName, "findServiceProviderProfile test scenario", 
+//	        			"findServiceProviderProfile", test_execution_id, 7);
 	        	
 	        	if (test_json_file == "")
 	        	{
@@ -334,6 +333,9 @@ public class PopulateFeatureExamples {
 	        	
 	            ProcessFile(featureFiles[i].getPath(), test_json_file, test_execution_id);
 	        }
+        	System.out.println("");
+	        System.out.println(String.format("Processed all feature files. Ready to execute tests!"));
+
         }
         catch (Exception e){
     		System.out.println(e.toString());

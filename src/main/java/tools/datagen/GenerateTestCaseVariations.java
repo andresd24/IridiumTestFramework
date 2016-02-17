@@ -113,29 +113,6 @@ public class GenerateTestCaseVariations {
 	}
 
 	
-	private static void AddTestCaseVariationToScenario(BufferedWriter jsonBufferedWriter, String webMethod, int index) throws IOException
-	{
-	
-		timestamp = "";
-		signature = "";
-		
-		GenerateIridiumVariationSignature(webMethod);
-		
-	    System.out.println("Generating variations using database row " + (index +1));
-		
-		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"IWSTESTSP0001\"},");
-		jsonBufferedWriter.newLine();
-		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + signature + "\"},");
-		jsonBufferedWriter.newLine();
-		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + GetAccountNumberFromExcel(index) + "\"},");
-		jsonBufferedWriter.newLine();
-		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + timestamp + "\"},");
-		jsonBufferedWriter.newLine();
-		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + GetAccountNameFromExcel(index) + "\"}");
-		jsonBufferedWriter.newLine();
-	}
-	
-	
 	private static void GenerateIridiumVariationSignature(String soapMethod)
 	{
 		Date now = new Date();
@@ -154,10 +131,47 @@ public class GenerateTestCaseVariations {
 		byte[] result = macHash.doFinal( source.getBytes() );
 		signature = new String(Base64.encodeBase64(result));
 		
-		System.out.println(timestamp);
-		System.out.println(signature);
+	
+	}
+	
+	private static void AddTestCaseVariationToScenario(BufferedWriter jsonBufferedWriter, String webMethod, int index) throws IOException
+	{
+	
+		timestamp = "";
+		signature = "";
+		String accountNumber = "";
+		String accountName = "";
+		
+		System.out.println("");
+	    System.out.println(String.format("Generating variations using database row %1s:", (index +1)));
+		GenerateIridiumVariationSignature(webMethod);
+		
+		
+		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"IWSTESTSP0001\"},");
+		jsonBufferedWriter.newLine();
+		System.out.println("iwsUsername: IWSTESTSP0001");
+
+		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + signature + "\"},");
+		jsonBufferedWriter.newLine();
+		System.out.println(String.format("signature: %1s", signature));
+		
+		accountNumber = GetAccountNumberFromExcel(index); 
+		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + accountNumber+ "\"},");
+		jsonBufferedWriter.newLine();
+		System.out.println(String.format("serviceProviderAccountNumber: %1s", accountNumber));
+		
+		
+		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + timestamp + "\"},");
+		jsonBufferedWriter.newLine();
+		System.out.println(String.format("timestamp: %1s", timestamp));
+		
+		accountName = GetAccountNameFromExcel(index);
+		jsonBufferedWriter.write("\t\t\t\t{\"testRowCell\" : \"" + accountName + "\"}");
+		jsonBufferedWriter.newLine();
+		System.out.println(String.format("accountName: %1s", accountName));
 		
 	}
+	
 	
 	private static void GenerateExamplesTableHeader(BufferedWriter jsonBufferedWriter, String scenarioTitle) throws IOException
 	{
@@ -231,6 +245,9 @@ public class GenerateTestCaseVariations {
 	public static String GenerateSequencedTestVariations(String featureFileName, String scenarioTitle, String webMethod, String executionFolder, int variationCount) throws IOException
 	{
 		String testJsonPath = "";
+		System.out.println(String.format("Generating %1d sequenced test variations......", variationCount));
+		System.out.println("");
+
 		int maxVaritions = GetNumberOfRowsFromExcel();
 		
 		if (variationCount < maxVaritions)
@@ -262,6 +279,8 @@ public class GenerateTestCaseVariations {
 	{
 		String testJsonPath = "";
 		int maxVaritions = GetNumberOfRowsFromExcel();
+		System.out.println("");
+		System.out.println(String.format("Generating %1d random test variations......", variationCount));
 		
 		if (variationCount < maxVaritions)
 		{

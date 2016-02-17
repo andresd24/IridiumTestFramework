@@ -16,13 +16,6 @@ public class GenerateJunitReport {
 		Thread.sleep(2000);
 		FileUtils.copyDirectory(new File(sourceReportsFolder), desinationFolder, false);
 		
-		String pathToReport = String.format("%s1/%s2/index.html", System.getProperty("user.dir"), desinationFolder);
-		
-		//file:///C:/Users/adevivanco/workspace/IridiumTestFramework/test_executions/2016_02_16_10_42_02/test_reports/index.html
-		
-		String urlLinkToPath = String.format("file:///%s1",pathToReport.replace("\\", "/"));	
-			
-			
-	    System.out.println(String.format("Test report link: %s1", urlLinkToPath));
+	    System.out.println(String.format("Test report link: %1s", desinationFolder));
 	}
 }

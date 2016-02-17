@@ -125,7 +125,7 @@ public class IridiumDemoSteps {
 		try {
 			  url = new URL(urlStr);
 			  URLConnection urlConnection = url.openConnection();
-			   urlConnection.connect();
+			  urlConnection.connect();
 		} catch (MalformedURLException ex) {
 				assertionIsThrown = true;   
 				System.out.println("bad URL");
@@ -161,7 +161,8 @@ public class IridiumDemoSteps {
 		String fileName = CreateSoapXMLFileVariation("findServiceProviderProfile", soapVariables);
 
 		fileName = String.format("@test_executions/%1s/soap_requests/%2s", getCurrentExecution(), fileName);
-		System.out.println(fileName);
+		System.out.println("");
+		System.out.println(String.format("input file name filename: %1s", fileName));
         
 		Process p = new ProcessBuilder("ext/curl", "-X", "POST", "--header", "Content-Type: application/soap+xml;charset=UTF-8", 
 				"--header", "SOAPAction:irid:findServiceProviderProfile", "--data", fileName,  "http://192.168.0.218:8080/iws-current/iws-int").start();
@@ -173,7 +174,7 @@ public class IridiumDemoSteps {
         String newline = "";
         while ((newline = bufferedReader.readLine()) != null)
         {
-        	System.out.println(newline);
+        	System.out.println(String.format("SOAP response data: %1s", newline));
         	allResponseLines.add(newline);
         }
 		p.destroy();
