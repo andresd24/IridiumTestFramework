@@ -3,14 +3,12 @@ Feature: Iridum Web Service
 
   Scenario Outline: findServiceProviderProfile test scenario
     Given that the Iridiums service is up and running
-    And a request is sent to findServiceProviderProfile with iwsUsername '<iwsUsername>', signature '<signature>', serviceProviderAccountNumber '<serviceProviderAccountNumber>' and timestamp '<timestamp>'
+    And a request is sent to web service 'findServiceProviderProfile' with iwsUsername '<iwsUsername>', signature '<signature>', serviceProviderAccountNumber '<serviceProviderAccountNumber>' and timestamp '<timestamp>'
     Then the result must contain the expected account number '<serviceProviderAccountNumber>' and account name '<accountName>' 
    
-   [autodatagen]
+   	#web services:  findServiceProviderProfile,  mockServiceNotUsed
+   
+	[autodatagen]
 
 
 
-
-
-
-    

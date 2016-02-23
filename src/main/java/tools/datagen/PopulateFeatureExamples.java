@@ -19,12 +19,16 @@ import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Date;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 public class PopulateFeatureExamples {
 	
+	private static List<VariationScenario> variationScenarios = new ArrayList<VariationScenario>();
+
 	private static String getTestExecutionId()
 	{
 		Date date = new Date();
@@ -106,6 +110,9 @@ public class PopulateFeatureExamples {
         String line = null;
         boolean newline_tag = false;
         boolean example_tag = false;
+    
+    	String currentScenarioTitle = "";
+    	VariationScenario currentVariationScenario = new VariationScenario();
         while ((line = originalFileInputBufferedReader.readLine()) != null)
         {
             if (line.contains("Examples:") && newline_tag == false) {
@@ -114,6 +121,7 @@ public class PopulateFeatureExamples {
             	example_tag = true;
                 processedFeatureFileTempBufferedWriter.write(line);
                 processedFeatureFileTempBufferedWriter.newLine();
+                currentScenarioTitle = "";
             }
             else if (example_tag == true && newline_tag == false )
             {
@@ -127,6 +135,21 @@ public class PopulateFeatureExamples {
             	example_tag = false;
             	newline_tag = false;
                 processedFeatureFileTempBufferedWriter.write(line);
+                processedFeatureFileTempBufferedWriter.newLine();
+            }
+            else if (line.contains("Scenario Outline:"))
+            {
+            	int position = ("Scenario Outline: ").length() + 1;
+            	currentScenarioTitle = line.substring(position).trim();
+            	currentVariationScenario = new VariationScenario(currentScenarioTitle);
+            	variationScenarios.add(currentVariationScenario);
+            	processedFeatureFileTempBufferedWriter.write(line);
+                processedFeatureFileTempBufferedWriter.newLine();
+            }
+            else if (line.contains("#web services:"))
+            {
+            	currentVariationScenario.ParseFeatureFileCommentLineIntoListOfScenarioWebMethods(line);
+            	processedFeatureFileTempBufferedWriter.write(line);
                 processedFeatureFileTempBufferedWriter.newLine();
             }
             else 
@@ -313,10 +336,12 @@ public class PopulateFeatureExamples {
 	    	
 	        for (int i = 0; i < featureFiles.length; i++)
 	        {
+	        	
+	        	
+	        	// get list of scenario titles
 	        	PreProcessFile(featureFiles[i].getPath());
 	
 	        	currentFileName = featureFiles[i].getName();
-	        	
 	        	System.out.println(String.format("processing feature file \"%1s\"", currentFileName));
 	        	
 	        	
@@ -326,11 +351,26 @@ public class PopulateFeatureExamples {
 	        	//		Input (DB/File/Algorithm) -> JSON Generation -> Feature file modification 	        	   //
 	        	/***************************************************************************************************/
 	        	
-	        	test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariations(currentFileName, "findServiceProviderProfile test scenario", 
-	        			"findServiceProviderProfile", test_execution_id, 5);
-	
-//	        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations(currentFileName, "findServiceProviderProfile test scenario", 
-//	        			"findServiceProviderProfile", test_execution_id, 7);
+	        	// loop for each scenario
+	        	for (int j = 0; j < variationScenarios.size(); j++)
+	        	{
+		        	/***************************************************************************************************/
+		        	// TODO: We need to aggregate the creation of all scenario outline variations into a single JSON   //
+		        	//       per feature file.  This might be hard but it's required.  Maybe this can be achieved by   //
+		        	//		 simply appending to the created JSON in the previous loop instance so it's not so hard    //
+		        	/***************************************************************************************************/
+	        		
+	        			        		
+//	        		test_json_file = GenerateTestCaseVariations.GenerateSequencedTestVariationsForScenario(currentFileName, 
+//	        				variationScenarios.get(j), test_execution_id, 5);
+	        		
+	        		test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariationsForScenario(currentFileName, 
+	        				variationScenarios.get(j), test_execution_id, 5);
+
+//		        	test_json_file = GenerateTestCaseVariations.GenerateRandomTestVariations(currentFileName, "findServiceProviderProfile test scenario", 
+//        			"findServiceProviderProfile", test_execution_id, 7);
+
+	        	}
 	        	
 	        	if (test_json_file == "")
 	        	{

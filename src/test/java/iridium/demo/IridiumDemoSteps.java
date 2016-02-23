@@ -138,8 +138,8 @@ public class IridiumDemoSteps {
 	}
 	
 	
-	@And("^a request is sent to findServiceProviderProfile with iwsUsername '(.*)', signature '(.*)', serviceProviderAccountNumber '(.*)' and timestamp '(.*)'$")
-	public void sendRequestToFindServiceProviderProfile(String iwsUsername, String signature, String serviceProviderAccountNumber, String timeStamp) throws InterruptedException, IOException 
+	@And("^a request is sent to web service '(.*)' with iwsUsername '(.*)', signature '(.*)', serviceProviderAccountNumber '(.*)' and timestamp '(.*)'$")
+	public void sendRequestToFindServiceProviderProfile(String webServiceName, String iwsUsername, String signature, String serviceProviderAccountNumber, String timeStamp) throws InterruptedException, IOException 
 	{
 		
 		VariationPair iwsUsernamePair = new VariationPair();
@@ -158,14 +158,14 @@ public class IridiumDemoSteps {
 		timeStampPair.setTestVariation("{timestamp}", timeStamp);
 		soapVariables.add(timeStampPair);
 		
-		String fileName = CreateSoapXMLFileVariation("findServiceProviderProfile", soapVariables);
+		String fileName = CreateSoapXMLFileVariation(webServiceName, soapVariables);
 
 		fileName = String.format("@test_executions/%1s/soap_requests/%2s", getCurrentExecution(), fileName);
 		System.out.println("");
 		System.out.println(String.format("input file name filename: %1s", fileName));
         
 		Process p = new ProcessBuilder("ext/curl", "-X", "POST", "--header", "Content-Type: application/soap+xml;charset=UTF-8", 
-				"--header", "SOAPAction:irid:findServiceProviderProfile", "--data", fileName,  "http://192.168.0.218:8080/iws-current/iws-int").start();
+				"--header", String.format("SOAPAction:irid:%1s", webServiceName), "--data", fileName,  "http://192.168.0.218:8080/iws-current/iws-int").start();
 
 		InputStream inputStream = p.getInputStream();
 		InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

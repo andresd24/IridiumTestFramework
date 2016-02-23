@@ -30,7 +30,6 @@ public class GenerateTestCaseVariations {
 	
 	private static ArrayList<Integer> listOfPossibleValues = new ArrayList<Integer>();
 	
-	
 	private static void loadInitialVariations(int maxNumberOfValues)
 	{
 		 for (int i = 0; i < maxNumberOfValues; i++)
@@ -242,7 +241,7 @@ public class GenerateTestCaseVariations {
 	}
 	
 	
-	public static String GenerateSequencedTestVariations(String featureFileName, String scenarioTitle, String webMethod, String executionFolder, int variationCount) throws IOException
+	public static String GenerateSequencedTestVariationsForScenario(String featureFileName, VariationScenario variationScenario, String executionFolder, int variationCount) throws IOException
 	{
 		String testJsonPath = "";
 		System.out.println(String.format("Generating %1d sequenced test variations......", variationCount));
@@ -256,7 +255,7 @@ public class GenerateTestCaseVariations {
 	        FileWriter jsonFileWriter = new FileWriter(testJsonPath, true);
 	        BufferedWriter jsonBufferedWriter = new BufferedWriter(jsonFileWriter);
 	    
-	        GenerateExamplesTableHeader(jsonBufferedWriter, scenarioTitle);
+	        GenerateExamplesTableHeader(jsonBufferedWriter, variationScenario.getScenarioTitle());
 			
 			jsonBufferedWriter.write("\t\t \"testRows\":[ ");
 			jsonBufferedWriter.newLine();
@@ -264,7 +263,13 @@ public class GenerateTestCaseVariations {
 			// generate variations
 			for (int i = 0; i < variationCount; i++)
 			{
-				GenerateExampleTestRowVariation(jsonBufferedWriter, webMethod, variationCount, i); 
+	        	/***************************************************************************************************/
+	        	// TODO: We can't hard code to the first web method here.  We must find a way to logically select  //
+	        	//       the web service related to the data generation step.  Here it's the only one:             //
+	        	//		 findServiceProviderProfile because it's the only one created                        	   //
+	        	/***************************************************************************************************/
+				
+				GenerateExampleTestRowVariation(jsonBufferedWriter, variationScenario.getListOfWebMethodsInScenario().get(0), variationCount, i); 
 			}
 
 			GenerateExampleTestVariationFooter(jsonBufferedWriter);
@@ -275,7 +280,7 @@ public class GenerateTestCaseVariations {
 		return testJsonPath;
 	}
 
-	public static String GenerateRandomTestVariations(String featureFileName, String scenarioTitle, String webMethod, String executionFolder, int variationCount) throws IOException
+	public static String GenerateRandomTestVariationsForScenario(String featureFileName, VariationScenario variationScenario, String executionFolder, int variationCount) throws IOException
 	{
 		String testJsonPath = "";
 		int maxVaritions = GetNumberOfRowsFromExcel();
@@ -290,7 +295,7 @@ public class GenerateTestCaseVariations {
 	        FileWriter jsonFileWriter = new FileWriter(testJsonPath, true);
 	        BufferedWriter jsonBufferedWriter = new BufferedWriter(jsonFileWriter);
 	    
-	        GenerateExamplesTableHeader(jsonBufferedWriter, scenarioTitle);
+	        GenerateExamplesTableHeader(jsonBufferedWriter, variationScenario.getScenarioTitle());
 			
 			jsonBufferedWriter.write("\t\t \"testRows\":[ ");
 			jsonBufferedWriter.newLine();
@@ -298,8 +303,14 @@ public class GenerateTestCaseVariations {
 			// generate variations
 			for (int i = 0; i < variationCount; i++)
 			{
+	        	/***************************************************************************************************/
+	        	// TODO: We can't hard code to the first web method here.  We must find a way to logically select  //
+	        	//       the web service related to the data generation step.  Here it's the only one:             //
+	        	//		 findServiceProviderProfile because it's the only one created                        	   //
+	        	/***************************************************************************************************/
+				
 				int randomIndex = GetRandomVariationIndex();
-				GenerateExampleTestRowVariation(jsonBufferedWriter, webMethod, variationCount, randomIndex); 
+				GenerateExampleTestRowVariation(jsonBufferedWriter, variationScenario.getListOfWebMethodsInScenario().get(0), variationCount, randomIndex); 
 			}
 
 			GenerateExampleTestVariationFooter(jsonBufferedWriter);

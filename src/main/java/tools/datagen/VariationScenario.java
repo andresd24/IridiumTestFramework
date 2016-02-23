@@ -1,19 +1,24 @@
 package tools.datagen;
 
+import java.util.List;
 import java.util.ArrayList;
-import tools.datagen.VariationPair;
+import java.util.Arrays;
 
 public class VariationScenario {
 
     private String scenarioTitle = "";
-    private ArrayList<VariationPair> testVariations = new ArrayList<VariationPair>();
-    private int testVariationCount = 0;
-
+    private List<String> webMethods = new ArrayList<String>();
     
-    public VariationScenario(String scenarioTitle, ArrayList<VariationPair> testVariations)
+    public void ParseFeatureFileCommentLineIntoListOfScenarioWebMethods(String rawCommentLine)
+    {
+    	int position = rawCommentLine.indexOf("#web services:") +  ("#web services:").length() + 1;
+    	String m_rawCommentLine = rawCommentLine.substring(position).trim();
+    	this.webMethods  = Arrays.asList(m_rawCommentLine.split("\\s*,\\s*"));
+    }
+    
+    public VariationScenario(String scenarioTitle, String featureFileCommentLine)
     {
         this.scenarioTitle = scenarioTitle;
-        this.testVariations = testVariations;
     }
 
     public VariationScenario(String scenarioTitle) { 
@@ -25,47 +30,13 @@ public class VariationScenario {
     	this.scenarioTitle = scenarioTitle;
     }
 
-    public void addTestVariationToScenario(ArrayList<VariationPair> testVariation)
+    public List<String> getListOfWebMethodsInScenario()
     {
-    	this.testVariations.addAll(testVariationCount, testVariation);
-    	testVariationCount++;
+    	return this.webMethods;
     }
     
     public VariationScenario() { }
     
-    public ArrayList<VariationPair> getVariationPairs()
-    {
-    	return testVariations;      	
-    }
-    
-    public ArrayList<String> getColumnNameTitles()
-    {
-    	ArrayList<String> columnNameTitles = new ArrayList<String>();
-    	
-    	for (int i = 0 ; i < testVariations.size(); i++)
-    	{
-    		String currentTemplateString = testVariations.get(i).getTemplateString(); 
-    		String columnNameTitle = currentTemplateString.replaceAll("\\{", "");
-    		columnNameTitle = columnNameTitle.replaceAll("\\}", "");
-    		
-    		columnNameTitles.add(columnNameTitle);
-    	}
-    	return columnNameTitles;
-    }
-
-    public ArrayList<String> getCellValues()
-    {
-    	ArrayList<String> cellValues = new ArrayList<String>();
-    	
-    	for (int i = 0 ; i < testVariations.size(); i++)
-    	{
-    		String currentCellValue = testVariations.get(i).getTestData(); 
-    		
-    		cellValues.add(currentCellValue);
-    	}
-    	return cellValues;
-    }
-
 
     public String getScenarioTitle()
     {
